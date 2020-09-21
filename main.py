@@ -82,17 +82,13 @@ def equation_13(B: np.ndarray, T: List[int]):
 def discrete_network_embedding(A: np.ndarray, T: List[int]):
     S = (A + (A @ A)) / 2
     W = np.random.rand(M, C)
-    # B = np.array([
-    #     [-1, -1, -1, -1, +1, +1, +1,  0, +0, +0, +0, +0],
-    #     [-1, -1, -1, +1, -1, -1, +1,  +0, +0, +0, +0, +0]
-    # ])
-    # B = np.array([
-    #     [-1, -1, -1,  -1, -1, -1, -1,  +1, +1,  -0.5, -0.5, -0.5],
-    #     [-1, -1, -1,  +1, +1, +1, +1,  +0, +0,  -0.5, -0.5, -0.5]
-    # ])
-    B = np.random.uniform(-0.9, 0.9, (M, N))
+    B = np.random.uniform(-1, 1, (M, N))
+    B[:, 0] = [-1, -1]
+    B[:, 1] = [+1, +1]
+    B[:, 2] = [-1, -1]
+
     for _ in count(1, 100):
-        for _ in count(1, 10):
+        for _ in count(1, 100):
             B = equation_11(B, S, W, T)
         W = equation_13(B, T)
 
@@ -102,7 +98,10 @@ def discrete_network_embedding(A: np.ndarray, T: List[int]):
 
 
 if __name__ == "__main__":
-    G = sample2()
+    G = sample4()
     A = nx.to_numpy_array(G)
-    T = [0, 0, 0, 1, 1, 1, 1, 2, 2]
+    T = [0, 1, 0]
+    N = 6
+    L = 3
+    C = 2
     B, W = discrete_network_embedding(A, T)

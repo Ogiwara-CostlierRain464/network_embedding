@@ -62,3 +62,42 @@ def sample2():
         (10, 11, {"weight": 5}),
     ])
     return G
+
+
+def sample3():
+    G = nx.Graph()
+    for i in range(0, 8 + 1):
+        G.add_node(i)
+    G.add_edges_from([
+        (0, 3, {"weight": 1}),
+        (0, 4, {"weight": 1}),
+        (3, 4, {"weight": 1})
+    ])
+    G.add_edges_from([
+        (1, 5, {"weight": 1}),
+        (1, 6, {"weight": 1}),
+        (5, 6, {"weight": 1}),
+    ])
+    G.add_edges_from([
+        (2, 7, {"weight": 1}),
+        (2, 8, {"weight": 1}),
+        (7, 8, {"weight": 1}),
+    ])
+    return G
+
+
+def sample4():
+    G = nx.Graph()
+    for i in range(0, 5 + 1):
+        G.add_node(i)
+    G.add_edges_from([
+        (0, 2, {"weight": 1}),
+        (0, 4, {"weight": 1}),
+        (2, 4, {"weight": 1})
+    ])
+    G.add_edges_from([
+        (1, 3, {"weight": 1}),
+        (1, 5, {"weight": 1}),
+        (3, 5, {"weight": 1}),
+    ])
+    return G
