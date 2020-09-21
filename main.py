@@ -1,72 +1,108 @@
+from typing import List
+
 import numpy as np
 import networkx as nx
+import matplotlib.pyplot as plt
+from helper import count
+from sample import *
+
+# number of nodes.
+N = 12
+# embedding dimensionality.
+M = 2
+# number of classes.
+C = 3
+# number of labels
+L = 9
+# τ
+TAU = 5
+# λ
+LAMBDA = 0.5
+# μ
+MU = 0.01
+# ρ
+RHO = 0.01
 
 
-def C(x, y):
-    if x != 0:
+def CF(x: np.ndarray, y: np.ndarray):
+    if not np.any(x):  # if some of element is not 0
         return x
     else:
         return y
 
 
-def sgn(x):
-    if x > 0:
-        return 1
-    else:
-        return -1
+def sgn(x: np.ndarray):
+    x_sign = np.sign(x)  # convert to {+1, 0} matrix.
+    return np.where(x_sign == 0, -1, x_sign)  # change all 0 to -1.
 
 
-def W0(W: np.ndarray):
-    return W
+def WO(W: np.ndarray, T: List[int]):
+    assert W.shape == (M, C)
+    assert len(T) == L
+
+    w_mean = W.mean(axis=1)
+    sum_mc = W.sum(axis=1)
+    wo = []
+    for _i in range(0, L):
+        ci = T[_i]
+        woi = sum_mc - (W[:, ci] * C)
+        wo.append(woi)
+    for _ in count(L + 1, N):
+        woi = sum_mc - (w_mean * C)
+        wo.append(woi)
+    return np.column_stack(wo)
 
 
-def equation_11(B: np.ndarray, S: np.ndarray, W: np.ndarray):
-    pass
+def one(dim: int):
+    return np.ones(dim).reshape(N, 1)
 
 
-def equation_13(B: np.ndarray):
-    pass
+def equation_11(B: np.ndarray, S: np.ndarray, W: np.ndarray, T: List[int]):
+    assert B.shape == (M, N)
+    assert S.shape == (N, N)
+    assert W.shape == (M, C)
+    dLB = - B @ S + WO(W, T) * LAMBDA + (B @ B.T @ B) * MU + (B @ one(N) @ one(N).T) * RHO
+    return sgn(CF(B * TAU - dLB, B))
 
 
-def discrete_network_embedding(A: np.ndarray):
-    n = 12
-    m = 3
-    C = 2
-    S = (A + (A @ A))/2
-    W = np.random.rand(m, C)
-    B = np.random.rand(m, n)
-    for _ in range(1, 100+1):
-        for _ in range(1, 10):
-            pass
+def equation_13(B: np.ndarray, T: List[int]):
+    w_columns = []
+    sum_2 = B.sum(axis=1).reshape((M, 1))
+    for c in range(0, C):
+        sum_1 = np.zeros((M, 1))
+        for i in range(0, L):
+            if T[i] == c:
+                sum_1 = sum_1 + B[:, i].reshape((M, 1))
+
+        w_c = sgn(sum_1 * C - sum_2)
+        w_columns.append(w_c)
+    return np.column_stack(w_columns)
+
+
+def discrete_network_embedding(A: np.ndarray, T: List[int]):
+    S = (A + (A @ A)) / 2
+    W = np.random.rand(M, C)
+    # B = np.array([
+    #     [-1, -1, -1, -1, +1, +1, +1,  0, +0, +0, +0, +0],
+    #     [-1, -1, -1, +1, -1, -1, +1,  +0, +0, +0, +0, +0]
+    # ])
+    # B = np.array([
+    #     [-1, -1, -1,  -1, -1, -1, -1,  +1, +1,  -0.5, -0.5, -0.5],
+    #     [-1, -1, -1,  +1, +1, +1, +1,  +0, +0,  -0.5, -0.5, -0.5]
+    # ])
+    B = np.random.uniform(-0.9, 0.9, (M, N))
+    for _ in count(1, 100):
+        for _ in count(1, 10):
+            B = equation_11(B, S, W, T)
+        W = equation_13(B, T)
+
+    plt.scatter(B[0], B[1])
+    plt.show()
+    return B, W
 
 
 if __name__ == "__main__":
-    G = nx.Graph()
-    for i in range(0, 11 + 1):
-        G.add_node(i)
-    G.add_edges_from([
-        (0, 1, {"weight": 3}),
-        (0, 2, {"weight": 3}),
-        (1, 2, {"weight": 3})
-    ])
-    G.add_edges_from([
-        (0, 4, {"weight": 4}),
-        (0, 5, {"weight": 7})
-    ])
-    G.add_edges_from([
-        (1, 6, {"weight": 5}),
-        (1, 7, {"weight": 5}),
-        (1, 8, {"weight": 4}),
-        (8, 7, {"weight": 10}),
-        (1, 9, {"weight": 6}),
-    ])
-    G.add_edges_from([
-        (2, 10, {"weight": 5}),
-        (2, 11, {"weight": 5}),
-        (2, 3, {"weight": 5}),
-        (11, 10, {"weight": 10}),
-    ])
+    G = sample2()
     A = nx.to_numpy_array(G)
-
-
-
+    T = [0, 0, 0, 1, 1, 1, 1, 2, 2]
+    B, W = discrete_network_embedding(A, T)
