@@ -7,13 +7,13 @@ from helper import count
 from sample import *
 
 # number of nodes.
-N = 12
+N = 6
 # embedding dimensionality.
 M = 2
 # number of classes.
-C = 3
+C = 2
 # number of labels
-L = 9
+L = 3
 # τ
 TAU = 5
 # λ
@@ -25,10 +25,7 @@ RHO = 0.01
 
 
 def CF(x: np.ndarray, y: np.ndarray):
-    if not np.any(x):  # if some of element is not 0
-        return x
-    else:
-        return y
+    return np.where(x == 0, y, x)
 
 
 def sgn(x: np.ndarray):
@@ -79,22 +76,37 @@ def equation_13(B: np.ndarray, T: List[int]):
     return np.column_stack(w_columns)
 
 
+def loss(B: np.ndarray, S: np.ndarray, W: np.ndarray, T: List[int]):
+    WO_ = WO(W, T)
+    return -0.5 * np.trace(B @ S @ B.T) \
+           + LAMBDA * np.trace(WO_.T @ B) \
+           + MU * 0.25 * np.trace(B @ B.T) \
+           + RHO * 0.5 * np.trace(B @ one(N))
+
+
 def discrete_network_embedding(A: np.ndarray, T: List[int]):
     S = (A + (A @ A)) / 2
+    # W = sgn(np.random.randint(-1, 2, (M, C)))
+    # B = sgn(np.random.randint(-1, 2, (M, N)))
     W = np.random.rand(M, C)
     B = np.random.uniform(-1, 1, (M, N))
     B[:, 0] = [-1, -1]
     B[:, 1] = [+1, +1]
     B[:, 2] = [-1, -1]
 
-    for _ in count(1, 100):
-        for _ in count(1, 100):
+
+    before_W = W
+    before_B = B
+
+    for _ in count(1, 20):
+        for _ in count(1, 4):
             B = equation_11(B, S, W, T)
         W = equation_13(B, T)
+        print(loss(B, S, W, T))
 
     plt.scatter(B[0], B[1])
     plt.show()
-    return B, W
+    return before_B, before_W, B, W
 
 
 if __name__ == "__main__":
@@ -104,4 +116,8 @@ if __name__ == "__main__":
     N = 6
     L = 3
     C = 2
-    B, W = discrete_network_embedding(A, T)
+    beforeB, beforeW, B, W = discrete_network_embedding(A, T)
+    S = (A + (A @ A)) / 2
+    loss_before = loss(beforeB, S, beforeW, T)
+    loss_after = loss(B, S, W, T)
+    print(loss_after - loss_before)
