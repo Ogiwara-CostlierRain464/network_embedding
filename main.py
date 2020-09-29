@@ -90,10 +90,6 @@ def discrete_network_embedding(A: np.ndarray, T: List[int]):
     # B = sgn(np.random.randint(-1, 2, (M, N)))
     W = np.random.rand(M, C)
     B = np.random.uniform(-1, 1, (M, N))
-    B[:, 0] = [-1, -1]
-    B[:, 1] = [+1, +1]
-    B[:, 2] = [-1, -1]
-
 
     before_W = W
     before_B = B
@@ -104,20 +100,22 @@ def discrete_network_embedding(A: np.ndarray, T: List[int]):
         W = equation_13(B, T)
         print(loss(B, S, W, T))
 
-    plt.scatter(B[0], B[1])
-    plt.show()
+    # plt.scatter(B[0], B[1])
+    # plt.show()
     return before_B, before_W, B, W
 
 
 if __name__ == "__main__":
-    G = sample4()
+    G = football()
     A = nx.to_numpy_array(G)
-    T = [0, 1, 0]
-    N = 6
-    L = 3
-    C = 2
+    T = []
+    N = 115
+    L = 0
+    C = 12
+    M = 4
     beforeB, beforeW, B, W = discrete_network_embedding(A, T)
     S = (A + (A @ A)) / 2
     loss_before = loss(beforeB, S, beforeW, T)
     loss_after = loss(B, S, W, T)
+    assert loss_before > loss_after
     print(loss_after - loss_before)

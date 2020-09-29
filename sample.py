@@ -1,4 +1,10 @@
 import networkx as nx
+import urllib.request as urllib
+import io
+import zipfile
+
+import matplotlib.pyplot as plt
+
 
 
 def sample1():
@@ -100,4 +106,24 @@ def sample4():
         (1, 5, {"weight": 1}),
         (3, 5, {"weight": 1}),
     ])
+    return G
+
+
+def sample5():
+    G = nx.karate_club_graph()
+    return G
+
+def football():
+    url = "http://www-personal.umich.edu/~mejn/netdata/football.zip"
+
+    sock = urllib.urlopen(url)  # open URL
+    s = io.BytesIO(sock.read())  # read into BytesIO "file"
+    sock.close()
+
+    zf = zipfile.ZipFile(s)  # zipfile object
+    txt = zf.read("football.txt").decode()  # read info file
+    gml = zf.read("football.gml").decode()  # read gml data
+    # throw away bogus first line with # from mejn files
+    gml = gml.split("\n")[1:]
+    G = nx.parse_gml(gml)  # parse gml data
     return G
