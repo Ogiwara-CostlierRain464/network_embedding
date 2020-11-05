@@ -2,9 +2,7 @@ import networkx as nx
 import urllib.request as urllib
 import io
 import zipfile
-
 import matplotlib.pyplot as plt
-
 
 
 def sample1():
@@ -97,14 +95,31 @@ def sample4():
     for i in range(0, 5 + 1):
         G.add_node(i)
     G.add_edges_from([
-        (0, 2, {"weight": 1}),
-        (0, 4, {"weight": 1}),
-        (2, 4, {"weight": 1})
+        (0, 1, {"weight": 0.5}),
+        (1, 2, {"weight": 0.5}),
+        (2, 0, {"weight": 0.5})
     ])
     G.add_edges_from([
-        (1, 3, {"weight": 1}),
-        (1, 5, {"weight": 1}),
-        (3, 5, {"weight": 1}),
+        (3, 4, {"weight": 0.5}),
+        (4, 5, {"weight": 0.5}),
+        (5, 3, {"weight": 0.5}),
+    ])
+    return G
+
+
+def sample4_2():
+    G = nx.Graph()
+    for i in range(0, 5 + 1):
+        G.add_node(i)
+    G.add_edges_from([
+        (0, 1, {"weight": 1}),
+        (1, 2, {"weight": 1}),
+        (2, 0, {"weight": 1})
+    ])
+    G.add_edges_from([
+        (3, 4, {"weight": 1}),
+        (4, 5, {"weight": 1}),
+        (5, 3, {"weight": 1}),
     ])
     return G
 
